@@ -1,12 +1,8 @@
 import express from "express";
-import mongoose from "mongoose";
 import path from "path";
 import cors from "cors"
-
-import authController from "./controller/authentication.controller";
-import userController from "./controller/user.controller";
-import itemContrller from "./controller/item.controller";
-import config from "./config";
+import routes from "./routes/v1"
+import { connectToMongo } from "./utils/dbConnector";
 
 const app = express();
 
@@ -14,13 +10,9 @@ const app = express();
 app.use(cors());
 app.options('*', cors());
 
-mongoose.connect(config.mLabURI);
+connectToMongo()
 
-app.use(express.static("public"));
-
-app.use("/api/users", userController);
-app.use("/api/auth", authController);
-app.use("/api/items", itemContrller);
+app.use('api/v1', routes);
 
 app.use(express.static(path.join(__dirname, '..', '..', "client", "build")));
 app.use("/public", express.static("public"));

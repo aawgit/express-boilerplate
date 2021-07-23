@@ -7,48 +7,13 @@ import {
   getItem,
   searchItem,
   updateItem,
-} from "../service/item.service";
-import multer from "multer";
-import cloudinary from "cloudinary";
-import cloudinaryStorage from "multer-storage-cloudinary";
-import config from "../config";
-import VerifyToken from "../_helper/VerifyToken";
+} from "../../service/item.service";
+import VerifyToken from "../../utils/VerifyToken";
 
 const router = express.Router();
 router.use(bodyParser.urlencoded({ extended: true }));
 router.use(bodyParser.json());
 
-cloudinary.config({
-  cloud_name: config.cloudinaryCloudName,
-  api_key: config.cloudinaryApiKey,
-  api_secret: config.cloudinaryApiSecret,
-});
-
-const cloudStorage = cloudinaryStorage({
-  cloudinary: cloudinary,
-  folder: "memes",
-  allowedFormats: ["jpg", "png"],
-  transformation: [{ width: 400, height: 400, crop: "limit" }],
-});
-const cloudImageUpload = multer({ storage: cloudStorage });
-
-//Image upload config
-const storage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    cb(null, "./public/images");
-    console.log(file);
-  },
-  filename: function (req, file, cb) {
-    cb(null, file.originalname);
-  },
-});
-var upload = multer({ storage });
-
-//image uploading with cloudinary
-
-/* router.post("/image", cloudImageUpload.single("file"), function(req, res) {
-  console.log(req.file)
-}); */
 
 router.delete("/image", (req, res) => {
   deleteImage();
@@ -62,7 +27,6 @@ router.delete("/image", (req, res) => {
 router.post(
   "/",
   VerifyToken,
-  cloudImageUpload.single("file"),
   async (req, res) => {
     try {
       const item = await createItem(req);
@@ -92,7 +56,7 @@ router.get("/", async (req, res) => {
   try {
     const searchString = req.query?.searchString
     let items
-    if(searchString) {
+    if (searchString) {
       items = await searchItem(searchString)
     }
     else {
